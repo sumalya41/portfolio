@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sumalya Bhattacharya</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Quantitative researcher: market microstructure, statistical arbitrage and systematic strategies. Research, results and code.">
+<meta property="og:title" content="Sumalya Bhattacharya — Quantitative Researcher">
+<meta property="og:description" content="Market microstructure, statistical arbitrage and systematic strategies. Every result labelled with how it was tested.">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a research ledger. Section labels sit in a left margin column; each result carries the test that produced it. */
+:root {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --fg: #15201b;
+  --muted: #586660;
+  --line: #d5dcd8;
+  --accent: #2340b0;
+  --accent-soft: #e6eafa;
+  --pos: #1b7547;
+  --neg: #b03d2b;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.1875rem;
+  --step-2: 1.5rem;
+  --step-3: clamp(2.25rem, 1.4rem + 3.6vw, 3.75rem);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1312; --surface: #151c1a; --fg: #e3e9e6; --muted: #94a39c; --line: #27312e;
+    --accent: #93a8ff; --accent-soft: #1c2440; --pos: #5cc992; --neg: #f08a75; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1312; --surface: #151c1a; --fg: #e3e9e6; --muted: #94a39c; --line: #27312e;
+  --accent: #93a8ff; --accent-soft: #1c2440; --pos: #5cc992; --neg: #f08a75; color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Header ---------- */
+.top {
+  display: flex; flex-wrap: wrap; gap: 12px 24px;
+  align-items: center; justify-content: space-between;
+  padding-block: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.mark { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+.mark b { color: var(--fg); font-weight: 500; }
+.toplinks { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.9375rem; }
+
+/* ---------- Hero ---------- */
+.hero { padding-block: 64px 48px; display: grid; gap: 28px; }
+.hero h1 {
+  font-size: var(--step-3);
+  font-weight: 800;
+  font-stretch: 78%;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+.hero .role { font-family: var(--font-display); font-size: var(--step-2); font-weight: 500; font-stretch: 90%; color: var(--muted); }
+.hero .lede { max-width: 62ch; font-size: var(--step-1); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 0.9375rem var(--font-body);
+  padding: 10px 16px; border-radius: 4px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+  text-decoration: none; cursor: pointer;
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.btn:hover { border-color: var(--accent); }
+.email { font-family: var(--font-mono); font-size: 0.875rem; color: var(--muted); user-select: all; }
+
+/* Headline results: the figures are the point of the page */
+.figures {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  border-top: 1px solid var(--fg); border-bottom: 1px solid var(--line);
+}
+.figure { padding: 18px 20px 18px 0; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.figure + .figure { padding-left: 20px; border-left: 1px solid var(--line); }
+.figure .v { font-family: var(--font-mono); font-size: 1.75rem; font-weight: 500; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.figure .k { font-weight: 500; }
+.figure .t { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+
+/* ---------- Ledger sections ---------- */
+.section {
+  display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px 40px;
+  padding-block: 56px; border-bottom: 1px solid var(--line);
+}
+.section > .label { padding-top: 6px; }
+.section h2 { font-size: var(--step-2); font-weight: 700; font-stretch: 85%; }
+
+/* Flagship study */
+.study { display: grid; gap: 22px; }
+.study .meta { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.study p { max-width: 68ch; }
+.steps { display: grid; gap: 14px; counter-reset: step; }
+.steps li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; max-width: 72ch; }
+.steps li::before {
+  counter-increment: step; content: counter(step);
+  font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 50%;
+  width: 24px; height: 24px; display: grid; place-items: center; margin-top: 2px;
+}
+.steps b { font-weight: 600; }
+
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.9375rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.caption { font-size: var(--step--1); color: var(--muted); max-width: 72ch; }
+
+/* Role */
+.role-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; }
+.role-head h3 { font-size: var(--step-1); font-weight: 700; font-stretch: 90%; }
+.stack { display: grid; gap: 28px; }
+
+/* Project rows */
+.projects { display: grid; }
+.proj {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 24px;
+  padding-block: 22px; border-top: 1px solid var(--line);
+}
+.proj:first-child { border-top: 0; padding-top: 0; }
+.proj h3 { font-size: var(--step-1); font-weight: 700; font-stretch: 90%; }
+.proj .where { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.03em; }
+.proj .body { grid-column: 1; display: grid; gap: 8px; max-width: 70ch; }
+.proj .result { font-family: var(--font-mono); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.proj .result span { color: var(--muted); }
+.proj .code { grid-column: 2; grid-row: 1 / span 2; align-self: start; white-space: nowrap; font-size: 0.9375rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags li {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  padding: 2px 8px; border-radius: 3px; background: var(--accent-soft); color: var(--fg);
+}
+
+/* Skills + education */
+.kv { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 10px 24px; }
+.kv dt { font-weight: 600; }
+.kv dd { margin: 0; color: var(--fg); }
+.edu { display: grid; gap: 14px; }
+.edu li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; align-items: baseline; }
+.edu .yr { font-family: var(--font-mono); font-size: 0.875rem; color: var(--muted); }
+
+footer { padding-block: 32px 48px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; color: var(--muted); font-size: var(--step--1); }
+
+@media (max-width: 760px) {
+  .section { grid-template-columns: minmax(0, 1fr); gap: 16px; padding-block: 44px; }
+  .figure + .figure { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
+  .proj { grid-template-columns: minmax(0, 1fr); }
+  .proj .code { grid-column: 1; grid-row: auto; }
+  .kv { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .kv dd { margin-bottom: 12px; }
+  .hero { padding-block: 44px 36px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn, a { transition: border-color .15s ease, text-decoration-thickness .15s ease; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <span class="mark"><b>SB</b> / quantitative research</span>
+    <nav class="toplinks" aria-label="Sections">
+      <a href="#research">Research</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#skills">Skills</a>
+    </nav>
+  </header>
+
+  <section class="hero" aria-labelledby="name">
+    <div style="display:grid; gap:10px">
+      <h1 id="name">Sumalya Bhattacharya</h1>
+      <p class="role">Quantitative Researcher — market microstructure, statistical arbitrage, systematic strategies</p>
+    </div>
+    <p class="lede">I build trading signals from raw market data and test them until they either survive or get dropped. Three years of research at a hedge fund, plus independent work on 1.3 billion crypto tick trades. Every result below says how it was tested.</p>
+    <div class="actions">
+      <a class="btn primary" href="resume.pdf" target="_blank" rel="noopener">Résumé (PDF)</a>
+      <a class="btn" href="https://github.com/sumalya41" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="btn" href="https://www.linkedin.com/in/sumalya/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <button class="btn" id="copy-email" type="button">Copy email</button>
+      <span class="email" id="email">bhattaacharyaasumalya@gmail.com</span>
+    </div>
+
+    <div class="figures" role="list">
+      <div class="figure" role="listitem">
+        <span class="v pos">+5.1 bps</span>
+        <span class="k">Maker-fill mark-out at 120 s</span>
+        <span class="t">one-shot 14-day holdout · bootstrap 5% bound +2.4</span>
+      </div>
+      <div class="figure" role="listitem">
+        <span class="v">1.3–1.8</span>
+        <span class="k">Out-of-sample Sharpe, NIFTY50</span>
+        <span class="t">walk-forward backtest · max drawdown &lt; 12%</span>
+      </div>
+      <div class="figure" role="listitem">
+        <span class="v">~1.3B</span>
+        <span class="k">Tick trades in the research store</span>
+        <span class="t">Binance + Bybit perps · 22M BTC trades/day</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RESEARCH ===================== -->
+  <section class="section" id="research" aria-labelledby="research-h">
+    <span class="label">Featured research</span>
+    <article class="study">
+      <div style="display:grid; gap:8px">
+        <h2 id="research-h">Liquidation-cascade signal for maker fills</h2>
+        <div class="meta">
+          <span class="label">BTC/ETH perpetual futures</span>
+          <span class="label">Dec 2025 – Feb 2026 data</span>
+          <span class="label">Independent, 2026</span>
+        </div>
+      </div>
+      <p>When forced liquidations cascade through a perpetual-futures market, some passive (maker) fills get run over and some get paid. The question: can causal features of the cascade tell them apart in real time, and does the difference survive trading costs?</p>
+
+      <ol class="steps">
+        <li><span><b>Data.</b> Streamed ~1.3B trades into day-sharded Parquet on integer-microsecond clocks, correcting Bybit’s 200 ms feed latency before any feature is computed. Found Binance’s liquidation feed is throttled to one row per second per symbol, so it under-reports exactly during cascades; re-used it for sign and timing only and took size from Bybit.</span></li>
+        <li><span><b>Features.</b> ~80 strictly causal features: Hawkes intensities of forced flow, cascade state, price displacement since cascade start (IC ≈ 0.14), order-flow imbalance, BTC–ETH lead–lag, forced-flow VPIN. Each passed brute-force recomputation and truncation tests with zero mismatches.</span></li>
+        <li><span><b>Selection.</b> A pre-registered keep/drop ledger removed 39 features. A model ladder from threshold rules to ridge, monotone GBM and LightGBM ran on identical 28-day walk-forward folds with a 1-day embargo, Bonferroni-adjusted statistics and a Hansen SPA check. A three-feature composite beat LightGBM out of sample, 5.1 vs 3.4 bps. A side-asymmetry hypothesis was dropped when its sign reversed out of sample.</span></li>
+        <li><span><b>Holdout.</b> The frozen specification, keeping the top 5% of maker-fill turnover, ran once on 14 unseen days: +5.1 bps over the unfiltered fill set at 120 s, day-bootstrap 5% lower bound +2.4 bps, 82% of coin-days positive, random placebo ≈ 0.</span></li>
+        <li><span><b>Tradability.</b> A queue-position and exit simulator on a 1-second order-book panel tested whether the edge can be captured after costs.</span></li>
+      </ol>
+
+      <div class="tablebox">
+        <table>
+          <caption class="label" style="text-align:left; padding:12px 14px 0">Exit simulation, 120 s horizon</caption>
+          <thead><tr><th>Exit scenario</th><th>Edge (bps)</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>Break-even taker exit cost</td><td class="n">5.2</td><td>Highest exit fee the edge can absorb</td></tr>
+            <tr><td>Taker exit at 2 bps</td><td class="n pos">+3.2 net</td><td>Bootstrap lower bound stays positive</td></tr>
+            <tr><td>Passive exit, 10 s timeout</td><td class="n pos">+5.6</td><td>78–86% of exits fill</td></tr>
+            <tr><td>Hold to 300 s</td><td class="n neg">≈ 0</td><td>Edge has decayed; horizon must stay short</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">Mark-out is the PnL of kept fills minus the PnL of all fills (incremental, not absolute strategy PnL). Runs were reproducible: deterministic thread-invariant fits, importance sampling reported with effective sample size, and an unsampled replay of the exported filter on every validation day.</p>
+    </article>
+  </section>
+
+  <!-- ===================== EXPERIENCE ===================== -->
+  <section class="section" id="experience" aria-labelledby="exp-h">
+    <span class="label">Experience</span>
+    <div class="stack">
+      <div style="display:grid; gap:6px">
+        <div class="role-head">
+          <h2 id="exp-h">DMNS Network Pte. Ltd. — hedge fund</h2>
+          <span class="num" style="color:var(--muted); font-size:.9375rem">Oct 2023 – present</span>
+        </div>
+        <p style="color:var(--muted)">Quantitative Trading Analyst (joined as Quantitative Research Intern). Full research cycle: data pipelines, hypothesis, walk-forward backtest, risk sizing, versioned signal code.</p>
+      </div>
+
+      <div class="projects">
+        <article class="proj">
+          <div class="body">
+            <h3>Systematic trend &amp; regime strategies</h3>
+            <span class="where">NIFTY50 · medium frequency</span>
+            <p class="result">Sharpe 1.3–1.8, max DD &lt; 12% <span>· out-of-sample, walk-forward backtest</span></p>
+            <p>Trend-following and regime-switching strategies with parameters chosen only inside training windows. Gating breakouts on the implied-minus-realised volatility spread raised precision 15–20% in high-volatility regimes. Reproducible ETL that repairs missing sessions, splits and duplicate timestamps.</p>
+            <ul class="tags"><li>Python</li><li>Backtrader</li><li>Pandas</li><li>scikit-learn</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/project_erlang_NDirec" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Statistical arbitrage &amp; mean-reversion engine</h3>
+            <span class="where">Crypto and ETF pairs</span>
+            <p>Pairs screened by cointegration (ADF) and Ornstein–Uhlenbeck half-life; Kalman-filter hedge ratios; tail dependence between legs modelled with Student-t, Clayton and Gumbel copulas. Volatility-targeted, half-Kelly sizing with circuit breakers on drawdown, leverage and regime breaks; weekend gaps filled without look-ahead bias.</p>
+            <ul class="tags"><li>Statsmodels</li><li>SciPy</li><li>Kalman filter</li><li>Copulas</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/mean_reversion_engine" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROJECTS ===================== -->
+  <section class="section" id="projects" aria-labelledby="proj-h">
+    <span class="label">Projects</span>
+    <div class="stack">
+      <h2 id="proj-h" class="sr-only" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)">Projects</h2>
+      <div class="projects">
+        <article class="proj">
+          <div class="body">
+            <h3>Options analytics microservice</h3>
+            <span class="where">NSE index options</span>
+            <p class="result">Greeks and implied volatility <span>· live, sub-second latency</span></p>
+            <p>Async FastAPI/WebSocket service with React dashboards. Rejects missing strikes, stale quotes, bid-ask anomalies and timestamp mismatches before the IV surface is calibrated. Dockerised.</p>
+            <ul class="tags"><li>FastAPI</li><li>WebSockets</li><li>React</li><li>Docker</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/nubra-options-microservice-SB" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Hierarchical Risk Parity framework</h3>
+            <span class="where">50+ US equities · 20 years</span>
+            <p class="result">HRP vs inverse-variance vs mean-variance <span>· out-of-sample walk-forward</span></p>
+            <p>HRP with generalised-hyperbolic covariance in a modular framework, compared on identical rebalance dates with risk-contribution decomposition and drawdown attribution.</p>
+            <ul class="tags"><li>NumPy</li><li>SciPy</li><li>Pandas</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/Hierarchial-Risk-Parity" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Black-Litterman portfolio optimisation</h3>
+            <span class="where">Mean-variance with views</span>
+            <p class="result">Volatility −10–15% vs equal weight <span>· with higher risk-adjusted return</span></p>
+            <p>Markowitz optimisation with Black-Litterman views, allocation constraints, volatility targeting and dynamic rebalancing; outlier-filtered, rolling-normalised covariance.</p>
+            <ul class="tags"><li>SciPy optimisers</li><li>NumPy</li><li>Pandas</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/QFin.Colab" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Chinese commodity futures dataset</h3>
+            <span class="where">SHFE / DCE / CZCE · 2005–2021</span>
+            <p>Continuous-contract dataset across 77 contracts for intraday and overnight exposure research, with open-interest / volume roll rules and back-adjustment.</p>
+            <ul class="tags"><li>Pandas</li><li>NumPy</li><li>Statsmodels</li></ul>
+          </div>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Advanced portfolio construction</h3>
+            <span class="where">CPPI &amp; risk budgeting · EDHEC framework</span>
+            <p>CPPI capital protection and dynamic allocation; multi-factor risk budgeting driven by volatility and correlation.</p>
+            <ul class="tags"><li>Statsmodels</li><li>SciPy</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/EDHEC_BS_2.Py-ML-Advanced-Portfolio-Construction-and-Analysis" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Energy market analytics</h3>
+            <span class="where">Oil &amp; gas</span>
+            <p>Time-series forecasting of oil and gas prices and volumes with FRED macro data, for macro-risk signals and event-driven volatility.</p>
+            <ul class="tags"><li>Statsmodels</li><li>Pandas</li><li>FRED</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/OIL_GAS_Analysis" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Distributed market-event system</h3>
+            <span class="where">Erlang/OTP</span>
+            <p>Fault-tolerant actor-based services under OTP supervision trees, Mnesia-replicated transactional state, and financial contracts modelled in the composable-contracts style.</p>
+            <ul class="tags"><li>Erlang/OTP</li><li>Mnesia</li></ul>
+          </div>
+          <a class="code" href="https://github.com/sumalya41/erlang_Contracts" target="_blank" rel="noopener">Code ↗</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SKILLS ===================== -->
+  <section class="section" id="skills" aria-labelledby="skills-h">
+    <span class="label">Skills</span>
+    <div class="stack">
+      <h2 id="skills-h" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)">Skills</h2>
+      <dl class="kv">
+        <dt>Languages</dt><dd>Python (advanced), C++ (Boost), SQL, q/kdb+, MATLAB, Erlang/OTP</dd>
+        <dt>Research methods</dt><dd>Purged walk-forward CV with embargo, day-block bootstrap, Bonferroni and Hansen SPA, look-ahead bias tests, importance sampling, transaction-cost and queue simulation</dd>
+        <dt>Models</dt><dd>Hawkes processes, Kalman filtering, copulas, cointegration / OU, VPIN, gradient boosting, Black-Litterman, HRP, Greeks and IV surfaces</dd>
+        <dt>Data &amp; infrastructure</dt><dd>Tick stores (zstd Parquet, PyArrow streaming), NumPy, Pandas, SciPy, Statsmodels, LightGBM, Kafka, PySpark, FastAPI, Docker, Git, Linux</dd>
+        <dt>Markets</dt><dd>Crypto perpetuals, NSE equities and index options, Chinese commodity futures, US equities</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ===================== EDUCATION ===================== -->
+  <section class="section" aria-labelledby="edu-h">
+    <span class="label">Education</span>
+    <div class="stack">
+      <h2 id="edu-h" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)">Education</h2>
+      <ul class="edu">
+        <li><span><b>M.Sc. Data Science</b> — Manipal University · thesis on market microstructure (Kyle’s λ, Almgren–Chriss)</span><span class="yr">2024 – 2026</span></li>
+        <li><span><b>M.Sc. Applied Mathematics</b>, minor in Financial Mathematics — Parul University</span><span class="yr">2023 – 2025</span></li>
+        <li><span><b>PG Diploma in Applied Statistics</b> — Indian Statistical Institute, Kolkata</span><span class="yr">2023</span></li>
+        <li><span><b>B.Com (Hons) Finance</b> — University of Calcutta · <b>CA Intermediate</b> — ICAI</span><span class="yr"></span></li>
+      </ul>
+      <p class="caption">Top 10th percentile, IIT Kharagpur Finance Club Trading Competition 2025. Courses: Market Microstructure (Università di Napoli Federico II, 2026); Behavioral Finance (Duke, 2025).</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Sumalya Bhattacharya · Kolkata, India · open to quantitative research roles</span>
+    <span class="num">Updated Nov 2026</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var btn = document.getElementById('copy-email');
+  var email = document.getElementById('email');
+  if (!btn || !email) return;
+  btn.addEventListener('click', function () {
+    var text = email.textContent.trim();
+    var done = function () { btn.textContent = 'Email copied'; setTimeout(function () { btn.textContent = 'Copy email'; }, 2000); };
+    var fallback = function () {
+      var r = document.createRange(); r.selectNodeContents(email);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      btn.textContent = 'Selected — press Ctrl+C';
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  });
+})();
+</script>
+</body>
+</html>

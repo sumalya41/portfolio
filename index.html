@@ -173,6 +173,8 @@ td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-
 .proj .result { font-family: var(--font-mono); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
 .proj .result span { color: var(--muted); }
 .proj .code { grid-column: 2; grid-row: 1 / span 2; align-self: start; white-space: nowrap; font-size: 0.9375rem; }
+.proj .links { grid-column: 2; grid-row: 1 / span 2; align-self: start; display: grid; gap: 6px; justify-items: end; white-space: nowrap; font-size: 0.9375rem; }
+.size { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tags li {
   font-family: var(--font-mono); font-size: 0.75rem;
@@ -194,6 +196,7 @@ footer { padding-block: 32px 48px; display: flex; flex-wrap: wrap; gap: 8px 24px
   .figure + .figure { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
   .proj { grid-template-columns: minmax(0, 1fr); }
   .proj .code { grid-column: 1; grid-row: auto; }
+  .proj .links { grid-column: 1; grid-row: auto; display: flex; flex-wrap: wrap; gap: 6px 18px; }
   .kv { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .kv dd { margin-bottom: 12px; }
   .hero { padding-block: 44px 36px; }
@@ -260,6 +263,10 @@ footer { padding-block: 32px 48px; display: flex; flex-wrap: wrap; gap: 8px 24px
           <span class="label">Dec 2025 – Feb 2026 data</span>
           <span class="label">Independent, 2026</span>
         </div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="Docs/LIQ_BASELINE_V4_REPORT-10.pdf" target="_blank" rel="noopener">Figure pack (PDF) ↗</a>
+        <span class="size">80 pages · 16.5 MB · cascade phases, episodes and daily P&amp;L</span>
       </div>
       <p>When forced liquidations cascade through a perpetual-futures market, some passive (maker) fills get run over and some get paid. The question: can causal features of the cascade tell them apart in real time, and does the difference survive trading costs?</p>
 
@@ -332,6 +339,34 @@ footer { padding-block: 32px 48px; display: flex; flex-wrap: wrap; gap: 8px 24px
       <div class="projects">
         <article class="proj">
           <div class="body">
+            <h3>China futures research, multi-frequency</h3>
+            <span class="where">39 products · 2005–2021 · 5-minute to daily bars</span>
+            <p class="result">One live candidate: daily Stage 2 breakout, ~83 / 72 / 71 bp net per trade <span>· train / validation / test, test t = 2.3, still fails full robustness test</span></p>
+            <p>Volatility is forecastable (HAR-RV wins in every regime and time frame); direction mostly is not. Everything faster than about 30 minutes fails a 6 bp round-trip cost. One calendar split with a 20-day embargo and a 792-day test period read once, a Bonferroni bar on every search, and 418 truncation checks with zero failures.</p>
+            <ul class="tags"><li>HAR-RV</li><li>Student-t copula</li><li>Extreme value theory</li><li>Granger causality</li></ul>
+          </div>
+          <div class="links">
+            <a href="Docs/MFT_China_research_presentation.pdf" target="_blank" rel="noopener">Slides (PDF) ↗</a>
+            <span class="size">150 pages · 8.6 MB</span>
+          </div>
+        </article>
+
+        <article class="proj">
+          <div class="body">
+            <h3>Options order-book research</h3>
+            <span class="where">EUCO options vs FCEU futures · 22 sessions, Mar–Apr 2026</span>
+            <p class="result">35M market-by-order events replayed into books <span>· descriptive research, no live orders</span></p>
+            <p>Rebuilt bid and ask books from add, cancel and modify events, mapped a volatility surface (106 usable IV observations across 6 expiries) and tested skew, liquidity and time-of-day effects. Realised-volatility timing was consistent across slots (rank consistency 0.85) but liquidity was not (−0.34), so timing supports hedge-overlay research rather than a profit claim. The original momentum hypothesis was rejected.</p>
+            <ul class="tags"><li>MBO book replay</li><li>IV surface</li><li>Skew</li><li>Liquidity</li></ul>
+          </div>
+          <div class="links">
+            <a href="Docs/Options_report.pdf" target="_blank" rel="noopener">Report (PDF) ↗</a>
+            <span class="size">126 pages · 14 MB</span>
+          </div>
+        </article>
+
+        <article class="proj">
+          <div class="body">
             <h3>Options analytics microservice</h3>
             <span class="where">NSE index options</span>
             <p class="result">Greeks and implied volatility <span>· live, sub-second latency</span></p>
@@ -361,15 +396,6 @@ footer { padding-block: 32px 48px; display: flex; flex-wrap: wrap; gap: 8px 24px
             <ul class="tags"><li>SciPy optimisers</li><li>NumPy</li><li>Pandas</li></ul>
           </div>
           <a class="code" href="https://github.com/sumalya41/QFin.Colab" target="_blank" rel="noopener">Code ↗</a>
-        </article>
-
-        <article class="proj">
-          <div class="body">
-            <h3>Chinese commodity futures dataset</h3>
-            <span class="where">SHFE / DCE / CZCE · 2005–2021</span>
-            <p>Continuous-contract dataset across 77 contracts for intraday and overnight exposure research, with open-interest / volume roll rules and back-adjustment.</p>
-            <ul class="tags"><li>Pandas</li><li>NumPy</li><li>Statsmodels</li></ul>
-          </div>
         </article>
 
         <article class="proj">
